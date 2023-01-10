@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const UserModel = new mongoose.Schema(
+const UserSchema = new mongoose.Schema(
   {
     email: {
       type: String,
@@ -18,6 +18,11 @@ const UserModel = new mongoose.Schema(
       default: 'user',
     },
     username: { type: String, required: true },
+    avatar: {
+      type: String,
+      default:
+        'https://res.cloudinary.com/yuiichan/image/upload/v1673092107/y69shop/assets/avatar_default.jpg',
+    },
     phoneNumber: { type: String, required: true },
     address: { type: String, required: true },
     createAt: { type: Date, default: Date.now() },
@@ -28,4 +33,4 @@ const UserModel = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model('users', UserModel);
+module.exports = mongoose.model('users', UserSchema);

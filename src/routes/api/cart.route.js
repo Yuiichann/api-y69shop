@@ -1,8 +1,11 @@
 const CartController = require('../../controllers/cart.controller');
+const verifyToken = require('../../middleware/verifyToken');
 const router = require('express').Router();
 
-router.get('/', CartController.getCart);
+router.get('/', CartController.getCarts);
 
-router.post('/addCart', CartController.addCart);
+router.get('/byUser', verifyToken, CartController.getCartByUser);
+
+router.post('/addCart', verifyToken, CartController.addCart);
 
 module.exports = router;

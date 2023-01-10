@@ -29,6 +29,7 @@ const AuthController = {
           .json({ status: 'error', msg: 'Email or password Invalid!' });
 
       const tokens = GenerateTokens({
+        uid: foundUser._id,
         username: foundUser.username,
         email: foundUser.email,
         roles: foundUser.roles,
@@ -70,6 +71,7 @@ const AuthController = {
         return res.status(401).json({ status: 'error', msg: 'Unauthorized' });
 
       const tokens = GenerateTokens({
+        uid: foundUser._id,
         username: foundUser.username,
         email: foundUser.email,
         roles: foundUser.roles,

@@ -2,7 +2,7 @@ const FigureModel = require('../models/figure.model');
 const GenerateSlug = require('../utils/GenerateSlug');
 const UploadImage = require('../utils/UploadImage');
 const Logging = require('../library/Logging');
-const deleteFolderCloudinary = require('../services/deleteResources');
+const deleteFolderCloudinary = require('../utils/deleteResources');
 const { scaleList, categoryList } = require('../constants/figureConstant');
 
 const LIMIT_ITEM = 10;
@@ -16,6 +16,11 @@ const FigureController = {
 
     const search = req.query.search || '';
     let page = parseInt(req.query.page) - 1 || 0;
+
+    if (page < 0)
+      return res
+        .status(400)
+        .json({ status: 'error', error: 'Page query must be greater than 0' });
 
     let sort = req.query.sort || 'title';
     let scale = req.query.scale || 'all';
@@ -34,7 +39,10 @@ const FigureController = {
     // kiểm ra query sort hợp lệ hay không
     if (sort[1]) {
       if (sort[1] !== 'asc' && sort[1] !== 'desc') {
-        return res.status(400).json({ status: 'error', msg: 'Query Invalid!' });
+        return res.status(400).json({
+          status: 'error',
+          msg: "Query Sort contains only 2 values: 'asc' or 'desc'",
+        });
       }
 
       sortBy[sort[0]] = sort[1];
@@ -62,7 +70,7 @@ const FigureController = {
         {
           title: { $regex: search, $options: 'i' },
         },
-        '-_id -createdAt -updatedAt'
+        '-createdAt -updatedAt'
       )
         .where('scale')
         .in(scale)
@@ -75,12 +83,12 @@ const FigureController = {
 
       // trả về null
       if (totalItem === 0) {
-        return res
-          .status(200)
-          .json({ status: 'success', msg: 'Figure not found!', data: null });
+        return res.status(400).json({ status: 'error', error: 'Figure not found!' });
       }
 
-      return res.status(200).json({ success: true, totalPage, totalItem, data: figures });
+      return res
+        .status(200)
+        .json({ status: 'success', totalPage, totalItem, data: figures });
     } catch (error) {
       Logging.error(error);
       return res.status(500).json({ status: 'error', msg: 'Internal Server Error!' });
@@ -96,7 +104,7 @@ const FigureController = {
       const figure = await FigureModel.findOne({ slug });
 
       if (!figure) {
-        return res.status(400).json({ status: 'error', msg: 'Figure not found' });
+        return res.status(404).json({ status: 'error', msg: 'Figure not found' });
       }
 
       return res.status(200).json({ status: 'success', data: figure });
@@ -158,17 +166,28 @@ const FigureController = {
     // can't change title, slug, thumbnail, collections
     // if you want change this, you should delete current figure and add new figure
 
+    // if req.body rỗng
+    if (Object.keys(req.body).length === 0)
+      return res.status(400).json({ status: 'error', msg: 'Required new Info!' });
+
     const { slug } = req.params;
 
-    const discount = parseInt(req.body.discount);
-    const original_price = parseInt(req.body.original_price);
-
     try {
-      const figure = await FigureModel.findOne({ slug });
+      const foundFigure = await FigureModel.findOne({ slug });
 
-      if (!figure) {
-        return res.status(400).json({ status: 'error', msg: 'Figure not found!' });
+      if (!foundFigure) {
+        return res.status(404).json({ status: 'error', msg: 'Figure not found!' });
       }
+
+      // check các trường có update ko
+      const discount =
+        parseInt(req.body.discount) >= 0
+          ? parseInt(req.body.discount)
+          : foundFigure.discount;
+
+      const original_price = req.body.original_price
+        ? parseInt(req.body.original_price)
+        : foundFigure.original_price;
 
       const discounted_price = Math.round(
         original_price - (original_price * discount) / 100
@@ -176,13 +195,20 @@ const FigureController = {
 
       const updatedFigure = await FigureModel.findOneAndUpdate(
         { slug },
-        { ...req.body, discounted_price },
-        { returnDocument: 'after' }
+        {
+          ...req.body,
+          original_price,
+          discount,
+          discounted_price,
+        },
+        {
+          returnDocument: 'after',
+        }
       );
 
       return res.status(200).json({
         status: 'success',
-        msg: 'Update figure success!',
+        msg: 'Update figure successfully!',
         data: updatedFigure,
       });
     } catch (error) {
@@ -201,7 +227,7 @@ const FigureController = {
       const deletedFigure = await FigureModel.findOneAndDelete({ slug });
 
       if (!deletedFigure) {
-        return res.status(400).json({ status: 'error', msg: 'Figure not found!' });
+        return res.status(404).json({ status: 'error', msg: 'Figure not found!' });
       }
 
       // delete folder image

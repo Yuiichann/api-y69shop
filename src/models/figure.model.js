@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const FigureModel = new mongoose.Schema(
+const FigureSchema = new mongoose.Schema(
   {
     title: {
       type: String,
@@ -28,29 +28,12 @@ const FigureModel = new mongoose.Schema(
     category: {
       type: String,
       required: true,
-      enum: [
-        'scale-figure',
-        'nendoroid',
-        'pop-up-parade',
-        'figma',
-        'r-18',
-        'others',
-      ],
+      enum: ['scale-figure', 'nendoroid', 'pop-up-parade', 'figma', 'r-18', 'others'],
     },
     scale: {
       type: String,
       required: true,
-      enum: [
-        'non-scale',
-        '1/3',
-        '1/4',
-        '1/5',
-        '1/6',
-        '1/7',
-        '1/8',
-        '1/10',
-        '1/12',
-      ],
+      enum: ['non-scale', '1/3', '1/4', '1/5', '1/6', '1/7', '1/8', '1/10', '1/12'],
     },
 
     in_stock: {
@@ -99,6 +82,6 @@ const FigureModel = new mongoose.Schema(
   }
 );
 
-FigureModel.index({ title: 'text' });
+FigureSchema.index({ title: 'text' });
 
-module.exports = mongoose.model('figures', FigureModel);
+module.exports = mongoose.model('figures', FigureSchema);

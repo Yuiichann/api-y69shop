@@ -18,6 +18,12 @@ router.post(
   FigureController.addNewFigure
 );
 
+router.put(
+  '/update/:slug',
+  ValidateJoi(validateSchema.figure.update),
+  FigureController.updateFigre
+);
+
 router.delete('/delete/:slug', FigureController.deleteFigure);
 
 module.exports = router;
