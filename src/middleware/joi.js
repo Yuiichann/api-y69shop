@@ -1,3 +1,7 @@
+/*
+  Middleware dùng để kiểm tra dữ liệu post từ client
+*/
+
 const Joi = require('joi');
 
 const ValidateJoi = (schema) => {
@@ -6,7 +10,9 @@ const ValidateJoi = (schema) => {
       await schema.validateAsync(req.body);
       next();
     } catch (error) {
-      return res.status(422).json({ success: false, msg: 'Invalid information!', error });
+      return res
+        .status(422)
+        .json({ success: false, msg: 'Invalid information!', error: error.details });
     }
   };
 };
@@ -86,6 +92,7 @@ const validateSchema = {
       condition: Joi.number().min(0).integer(),
       maxPrice: Joi.number().min(0).integer().required(),
       amount: Joi.number().integer().min(1).required(),
+      description: Joi.string().required(),
     }),
   },
 
@@ -95,19 +102,30 @@ const validateSchema = {
         .regex(/^(0?)(3[2-9]|5[6|8|9]|7[0|6-9]|8[0-6|8|9]|9[0-4|6-9])[0-9]{7}$/)
         .required(),
       address: Joi.string().required(),
-      payment_method: Joi.string().valid('cash'),
-      type: Joi.string().valid('cash').required(),
+      payment_method: Joi.string().valid('cash').required(),
       voucher: Joi.string(),
       total: Joi.number().min(0).required(),
       items: Joi.array()
         .items(
           Joi.object({
-            _id: Joi.string().required(),
-            price: Joi.number().required(),
+            figure: Joi.string().required(),
             quantities: Joi.number().integer().min(1).required(),
           })
         )
         .required(), // array {figure:id, quantities: 2}
+    }),
+
+    updateInfoUser: Joi.object({
+      phoneNumber: Joi.string()
+        .regex(/^(0?)(3[2-9]|5[6|8|9]|7[0|6-9]|8[0-6|8|9]|9[0-4|6-9])[0-9]{7}$/)
+        .required(),
+      address: Joi.string().required(),
+    }),
+
+    updateStatus: Joi.object({
+      status: Joi.string()
+        .valid('cancelled', 'waiting', 'confirmed', 'delivering', 'finish')
+        .required(),
     }),
   },
 };

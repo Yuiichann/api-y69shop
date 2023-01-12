@@ -9,6 +9,8 @@ const VoucherController = {
     const { type } = req.body;
     let maxPrice = req.body.maxPrice;
 
+    // type === number || type === percent
+    //  nếu type là number thì không có maxPrice = 0
     if (type === 'number') {
       maxPrice = 0;
     }
@@ -30,9 +32,10 @@ const VoucherController = {
   },
 
   // @desc GET voucher by code
-  // @route GET /api/voucher/:code
+  // @route GET /api/voucher/code/:code
   // @access Private
   getVoucherByCode: async (req, res) => {
+    // get voucher by code
     const { code } = req.params;
 
     if (!code)

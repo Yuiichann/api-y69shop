@@ -31,6 +31,10 @@ const VoucherSchema = new Schema(
       required: true,
       default: 0,
     },
+    description: {
+      type: String,
+      required: true,
+    },
   },
   {
     versionKey: false,

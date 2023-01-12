@@ -21,6 +21,7 @@ const AuthController = {
           .json({ status: 'error', msg: 'Email or password Invalid!' });
       }
 
+      // so sánh pwd
       const matchPwd = await bcrypt.compare(password, foundUser.password);
 
       if (!matchPwd)
@@ -28,6 +29,7 @@ const AuthController = {
           .status(401)
           .json({ status: 'error', msg: 'Email or password Invalid!' });
 
+      // tạo 2 token
       const tokens = GenerateTokens({
         uid: foundUser._id,
         username: foundUser.username,
@@ -35,6 +37,7 @@ const AuthController = {
         roles: foundUser.roles,
       });
 
+      // lưu refresh token trên cookies, accessToken thì client tự lưu
       res.cookie('jwt', tokens.refreshToken, {
         httpOnly: true, //accessible only by web server
         secure: true, //https
@@ -57,11 +60,13 @@ const AuthController = {
   refresh: (req, res) => {
     const cookies = req.cookies;
 
+    // kiểm tra cookie có lưu refresh token ko, nếu có thì check, nếu không thì user chưa login
     if (!cookies?.jwt)
       return res.status(401).json({ status: 'error', msg: 'Unauthorized' });
 
     const refreshToken = cookies.jwt;
 
+    // check refresh token
     jwt.verify(refreshToken, config.jwt.REFRESH_TOKEN_SECRET, async (err, decoded) => {
       if (err) return res.status(403).json({ status: 'error', msg: 'Forbidden' });
 
@@ -70,6 +75,7 @@ const AuthController = {
       if (!foundUser)
         return res.status(401).json({ status: 'error', msg: 'Unauthorized' });
 
+      // nếu refresh Token hợp lệ thì tạo lại cả 2 token và set cookie token mới 
       const tokens = GenerateTokens({
         uid: foundUser._id,
         username: foundUser.username,

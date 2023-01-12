@@ -1,3 +1,9 @@
+/*
+  Tạo 2 tokens: 
+    - Access Token
+    - Refresh Token
+*/
+
 const jwt = require('jsonwebtoken');
 const config = require('../config/config');
 

@@ -30,3 +30,5 @@ app.use('/', routes);
 app.listen(config.server.PORT, () =>
   Logging.success(`App start at PORT ${config.server.PORT}`)
 );
+
+module.exports = app;

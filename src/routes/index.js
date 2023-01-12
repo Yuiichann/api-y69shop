@@ -7,7 +7,7 @@ const AuthRoutes = require('./auth/auth.route');
 const VoucherRoutes = require('./api/voucher.route');
 const OrderRoutes = require('./api/order.route');
 
-// SSR --------------------------------------------------------
+// SSR (Server Side Rendering) --------------------------------
 router.get('/', (req, res) => {
   res.render('index');
 });

@@ -12,11 +12,11 @@ const FigureController = {
   // @route GET /api/figure
   // @access Public
   getFigures: async (req, res) => {
-    console.log(req.user);
-
+    // Search query
     const search = req.query.search || '';
     let page = parseInt(req.query.page) - 1 || 0;
 
+    // page < 0 là lỗi
     if (page < 0)
       return res
         .status(400)
@@ -26,17 +26,20 @@ const FigureController = {
     let scale = req.query.scale || 'all';
     let category = req.query.category || 'all';
 
+    // all => lấy hết, ngược lại lấy theo query
+    // ví dụ: Category /?category=r-18,figma ==> lấy category r-18 và figma
     scale === 'all' ? (scale = [...scaleList]) : (scale = req.query.scale.split(','));
 
     category === 'all'
       ? (category = [...categoryList])
       : (category = req.query.category.split(','));
 
+    // query sort kiểu: /?sort=title,acs or /?sort=title,desc
     req.query.sort ? (sort = req.query.sort.split(',')) : (sort = [sort]);
 
     let sortBy = {};
 
-    // kiểm ra query sort hợp lệ hay không
+    // mặc định sort sẽ là asc, nếu có giá trị sort[1] thì check nó hợp lê hay không
     if (sort[1]) {
       if (sort[1] !== 'asc' && sort[1] !== 'desc') {
         return res.status(400).json({
@@ -101,6 +104,7 @@ const FigureController = {
   getOneFigure: async (req, res) => {
     const { slug } = req.params;
     try {
+      // get info figure theo slug
       const figure = await FigureModel.findOne({ slug });
 
       if (!figure) {
